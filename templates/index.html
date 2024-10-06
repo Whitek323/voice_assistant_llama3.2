@@ -1,0 +1,43 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI PDF Query Assistant</title>
+    <!-- ใช้ Tailwind CSS เพื่อความทันสมัย -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
+    <!-- Header -->
+    <header class="bg-white shadow py-4 w-full text-center">
+        <h1 class="text-3xl font-bold text-gray-800">AI Voice Assistant</h1>
+    </header>
+    <div id="loader" style="display: none;">
+        <!-- <img src="" alt="Loading..."> -->
+    </div>
+    
+    <!-- PDF Upload Section -->
+    <div class="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 mt-8">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Upload PDF or TXT</h2>
+        <input type="file" id="pdfFile" class="border border-gray-300 p-2 rounded-lg w-full mb-4">
+        <button onclick="uploadPDF()" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200 w-full">Upload PDF</button>
+        <div id="uploadStatus" class="mt-4 text-gray-600"></div>
+    </div>
+
+    <!-- Query Section -->
+    <div class="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 mt-8">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Ask a Question</h2>
+        <div class="flex space-x-2">
+            <input type="text" id="query" placeholder="กรุณาถามคำถามของคุณ..." class="border border-gray-300 p-2 rounded-lg flex-1 focus:outline-none focus:border-blue-400">
+            <button id="askButton" onclick="askQuestion()" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200">Ask</button>
+            <button id="micButton" onclick="startVoiceRecognition()" class="bg-gray-300 text-gray-600 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200">🎤</button>
+        </div>
+        <div id="answer" class="mt-4 text-gray-700"></div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
