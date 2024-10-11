@@ -25,10 +25,12 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 raw_prompt = PromptTemplate.from_template(
     """ 
-    <s>[INST] คุณเป็นผู้ช่วยทางเทคนิคที่มีความสามารถในการค้นหาเอกสาร ตอบลงท้ายด้วยค่ะ หรือ ฉัน หากคุณไม่มีข้อมูลที่เพียงพอในการตอบ โปรดแจ้งให้ทราบว่าไม่มีคำตอบจากข้อมูลที่ให้มา [/INST]</s>
-    [INST] {input}
+    <s>[INST] คุณเป็นไกด์นำเที่ยวที่มีความรู้เกี่ยวกับอำเภออู่ทอง จังหวัดสุพรรณบุรี คุณจะช่วยแนะนำสถานที่ท่องเที่ยว แนะนำการเดินทาง และข้อมูลท้องถิ่นอื่น ๆ โปรดตอบด้วยภาษาที่สุภาพและเป็นกันเอง หากคุณไม่มีข้อมูลที่เพียงพอในการตอบ โปรดแจ้งให้ทราบว่าข้อมูลไม่พร้อมค่ะ [/INST]</s>
+    [INST] 
+           คำถาม: {input}
            บริบท: {context}
-           คำตอบ:
+           โปรดพูดลงท้ายด้วยค่ะและแทนตัวเองด้วยฉัน และ ตอบคำถามนี้โดยอธิบายสถานที่ท่องเที่ยว ประวัติศาสตร์ วัฒนธรรม วิธีเดินทาง
+           และข้อมูลที่น่าสนใจเกี่ยวกับสถานที่ในอำเภออู่ทองให้กระชับและย่อที่สุดควรอยู่ละหว่าง 50-120 ตัวอักษร
     [/INST]
 """
 )
@@ -69,7 +71,6 @@ def aiPost():
     response_answer = {"answer": response}
     return response_answer
 
-
 @app.route("/ask_pdf", methods=["POST"])
 def askPDFPost():
     print("Post /ask_pdf called")
@@ -77,6 +78,15 @@ def askPDFPost():
     query = json_content.get("query")
 
     print(f"query: {query}")
+
+    # บริบทของอำเภออู่ทอง จังหวัดสุพรรณบุรี
+    context = """
+    อำเภออู่ทองเป็นอำเภอที่สำคัญทางประวัติศาสตร์และวัฒนธรรมของไทย โดยมีแหล่งโบราณสถานและพิพิธภัณฑ์ที่สำคัญ เช่น 
+    - วัดเขาทำเทียม 
+    - พิพิธภัณฑ์สถานแห่งชาติอู่ทอง 
+    - อุทยานมัธยม 
+    สถานที่เหล่านี้เป็นแหล่งรวบรวมโบราณวัตถุและเรื่องราวของอาณาจักรทวารวดี ซึ่งเป็นอารยธรรมที่เจริญรุ่งเรืองในภูมิภาคนี้
+    """
 
     print("Loading vector store")
     vector_store = Chroma(persist_directory=folder_path, embedding_function=embedding)
@@ -93,7 +103,8 @@ def askPDFPost():
     document_chain = create_stuff_documents_chain(cached_llm, raw_prompt)
     chain = create_retrieval_chain(retriever, document_chain)
 
-    result = chain.invoke({"input": query})
+    # ส่ง query และ context เข้าไปใน chain.invoke()
+    result = chain.invoke({"input": query, "context": context})
 
     print(result)
 
@@ -106,8 +117,8 @@ def askPDFPost():
     response_answer = {
         "answer": result["answer"], 
         # "sources": sources
-        }
-    tts = gTTS(text=response_answer["answer"], lang='th')
+    }
+    tts = gTTS(text=response_answer["answer"], lang='th',slow=False)
     audio_file_path = "static/response.mp3"
     tts.save(audio_file_path)
     return response_answer
